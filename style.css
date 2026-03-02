@@ -7,7 +7,8 @@
 }
 
 body {
-    background: #1a1a2e; /* Temas escuros são mais premium */
+    background: #1a1a2e;
+    /* Temas escuros são mais premium */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,16 +21,19 @@ body {
 #game-container {
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 4px solid #4a7c44; /* Borda verde floresta */
+    border: 4px solid #4a7c44;
+    /* Borda verde floresta */
     border-radius: 12px;
     overflow: hidden;
-    background: #87ceeb; /* Cor do céu inicial */
+    background: #87ceeb;
+    /* Cor do céu inicial */
 }
 
 /* Canvas do Jogo */
 #gameCanvas {
     display: block;
-    image-rendering: pixelated; /* Dá um look retrô limpo se necessário, ou deixe normal */
+    image-rendering: pixelated;
+    /* Dá um look retrô limpo se necessário, ou deixe normal */
 }
 
 /* Camada de UI Principal */
@@ -42,7 +46,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    pointer-events: none; /* Deixa cliques passarem para o canvas */
+    pointer-events: none;
+    /* Deixa cliques passarem para o canvas */
 }
 
 /* Telas (Start, Game Over) */
@@ -51,7 +56,8 @@ body {
     padding: 2rem;
     border-radius: 20px;
     text-align: center;
-    backdrop-filter: blur(8px); /* Efeito Glassmorphism premium */
+    backdrop-filter: blur(8px);
+    /* Efeito Glassmorphism premium */
     border: 1px solid rgba(255, 255, 255, 0.1);
     animation: fadeIn 0.5s ease-out;
 }
@@ -80,41 +86,95 @@ p {
     color: #ffd700;
 }
 
-.stats {
-    margin: 1.5rem 0;
-    font-size: 1.5rem;
+/* Loja de Skins */
+#skin-shop {
+    margin-top: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Score Board durante o jogo */
-#score-board {
-    position: absolute;
-    top: 20px;
-    left: 20px;
+#skin-shop h3 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: #ffd700;
+}
+
+.shop-items {
     display: flex;
-    gap: 20px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px 20px;
-    border-radius: 50px;
-    backdrop-filter: blur(5px);
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
-.score-item {
-    font-size: 1.2rem;
+.shop-item {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    pointer-events: auto;
+    /* IMPORTANTE: Habilitar cliques na UI */
+}
+
+.shop-item:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.shop-item.owned {
+    border-color: #56ab2f;
+}
+
+.shop-item.selected {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+.skin-preview {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.shop-item span {
+    font-size: 0.7rem;
     font-weight: bold;
-    color: #fff;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
 }
 
 /* Animações */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 strong {

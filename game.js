@@ -25,17 +25,34 @@ let animationId;
 let frames = 0;
 let score = 0;
 let coins = 0;
-let gameSpeed = 3; // Velocidade inicial do jogo
-let difficultyFactor = 0.001; // Quão rápido a velocidade aumenta
+let gameSpeed = 3;
+let difficultyFactor = 0.001;
+
+// --- SISTEMA DE LOGA E PERSISTÊNCIA ---
+let totalCoins = parseInt(localStorage.getItem('forestBird_totalCoins')) || 0;
+let ownedSkins = JSON.parse(localStorage.getItem('forestBird_ownedSkins')) || ['yellow'];
+let selectedSkin = localStorage.getItem('forestBird_selectedSkin') || 'yellow';
+
+const skins = {
+    yellow: { color: '#FFD700', beak: '#FFA500' },
+    red: { color: '#ff4d4d', beak: '#ffd700' },
+    blue: { color: '#4da6ff', beak: '#ffffff' },
+    purple: { color: '#a64dff', beak: '#ff4da6' }
+};
+
+function saveGameData() {
+    localStorage.setItem('forestBird_totalCoins', totalCoins);
+    localStorage.setItem('forestBird_ownedSkins', JSON.stringify(ownedSkins));
+    localStorage.setItem('forestBird_selectedSkin', selectedSkin);
+}
 
 // --- CONFIGURAÇÕES DO JOGADOR ---
 const playerConfig = {
     x: 50,
     y: 150,
     radius: 15,
-    gravity: 0.15,  // Extrema leveza para flutuar
-    jump: -4,       // Pulo super suave
-    color: '#FFD700',
+    gravity: 0.15,
+    jump: -4
 };
 
 class Player {
@@ -51,16 +68,16 @@ class Player {
     }
 
     draw() {
-        // Desenha o pássaro (Pode trocar por imagem depois)
         ctx.save();
         ctx.translate(this.x, this.y);
 
-        // Rotação baseada na velocidade (Dá sensação de peso)
         let rotation = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, this.velocity * 0.1));
         ctx.rotate(rotation);
 
+        const currentSkinData = skins[selectedSkin];
+
         // Corpo
-        ctx.fillStyle = playerConfig.color;
+        ctx.fillStyle = currentSkinData.color;
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -72,7 +89,7 @@ class Player {
         ctx.fill();
 
         // Bico
-        ctx.fillStyle = '#FFA500';
+        ctx.fillStyle = currentSkinData.beak;
         ctx.beginPath();
         ctx.moveTo(this.radius - 2, 0);
         ctx.lineTo(this.radius + 8, 2);
@@ -394,11 +411,69 @@ function gameOver() {
     gameState = 'GAME_OVER';
     cancelAnimationFrame(animationId);
 
+    // Atualiza moedas totais
+    totalCoins += coins;
+    saveGameData();
+
     // UI Update
     finalScoreEl.innerText = score;
     finalCoinsEl.innerText = coins;
+    document.getElementById('total-coins').innerText = totalCoins;
+    updateShopUI();
     gameOverScreen.classList.remove('hidden');
 }
+
+// --- LÓGICA DA LOJA ---
+function updateShopUI() {
+    const shopItems = document.querySelectorAll('.shop-item');
+    shopItems.forEach(item => {
+        const skinName = item.dataset.skin;
+        const price = parseInt(item.dataset.price);
+
+        // Limpar classes
+        item.classList.remove('owned', 'selected');
+
+        if (selectedSkin === skinName) {
+            item.classList.add('selected');
+        }
+
+        if (ownedSkins.includes(skinName)) {
+            item.classList.add('owned');
+            const span = item.querySelector('span');
+            span.innerText = (selectedSkin === skinName) ? "USANDO" : "PROPRIETÁRIO";
+        }
+    });
+}
+
+// Delegar cliques da loja
+document.addEventListener('click', (e) => {
+    const shopItem = e.target.closest('.shop-item');
+    if (!shopItem) return;
+
+    const skinName = shopItem.dataset.skin;
+    const price = parseInt(shopItem.dataset.price);
+
+    if (ownedSkins.includes(skinName)) {
+        // Selecionar skin já comprada
+        selectedSkin = skinName;
+        saveGameData();
+        updateShopUI();
+    } else {
+        // Tentar comprar
+        if (totalCoins >= price) {
+            totalCoins -= price;
+            ownedSkins.push(skinName);
+            selectedSkin = skinName;
+            saveGameData();
+            updateShopUI();
+            // Atualizar contagem de moedas na tela
+            document.getElementById('total-coins').innerText = totalCoins;
+            alert(`Skin ${skinName} comprada com sucesso!`);
+        } else {
+            alert("Moedas insuficientes!");
+        }
+    }
+});
 
 // Event Listeners
 window.addEventListener('keydown', (e) => {

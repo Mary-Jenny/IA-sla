@@ -25,9 +25,33 @@
                 <h1>FIM DE JOGO</h1>
                 <div class="stats">
                     <p>Árvores Superadas: <span id="final-score">0</span></p>
-                    <p>Moedas Coletadas: <span id="final-coins">0</span></p>
+                    <p>Moedas: <span id="final-coins">0</span></p>
+                    <p>Total Acumulado: 🪙 <span id="total-coins">0</span></p>
                 </div>
-                <p>Pressione <strong>ESPAÇO</strong> para reiniciar</p>
+
+                <div id="skin-shop">
+                    <h3>LOJA DE SKINS</h3>
+                    <div class="shop-items">
+                        <div class="shop-item owned" data-skin="yellow" data-price="0">
+                            <div class="skin-preview" style="background: #FFD700"></div>
+                            <span>Padrão</span>
+                        </div>
+                        <div class="shop-item" data-skin="red" data-price="10">
+                            <div class="skin-preview" style="background: #ff4d4d"></div>
+                            <span>Fênix (10)</span>
+                        </div>
+                        <div class="shop-item" data-skin="blue" data-price="25">
+                            <div class="skin-preview" style="background: #4da6ff"></div>
+                            <span>Gelo (25)</span>
+                        </div>
+                        <div class="shop-item" data-skin="purple" data-price="50">
+                            <div class="skin-preview" style="background: #a64dff"></div>
+                            <span>Vazio (50)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p style="margin-top: 20px;">Pressione <strong>ESPAÇO</strong> para reiniciar</p>
             </div>
             <div id="score-board" class="hidden">
                 <div class="score-item">🌳: <span id="current-score">0</span></div>
