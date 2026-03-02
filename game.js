@@ -29,7 +29,13 @@ let gameSpeed = 3;
 let difficultyFactor = 0.001;
 
 // --- SISTEMA DE LOGA E PERSISTÊNCIA ---
-let totalCoins = parseInt(localStorage.getItem('forestBird_totalCoins')) || 0;
+let totalCoins = localStorage.getItem('forestBird_totalCoins');
+if (totalCoins === null) {
+    totalCoins = 5; // Presente de início para comprar a primeira skin mais rápido!
+    localStorage.setItem('forestBird_totalCoins', totalCoins);
+} else {
+    totalCoins = parseInt(totalCoins);
+}
 let ownedSkins = JSON.parse(localStorage.getItem('forestBird_ownedSkins')) || ['yellow'];
 let selectedSkin = localStorage.getItem('forestBird_selectedSkin') || 'yellow';
 
@@ -278,8 +284,8 @@ function gameLoop() {
             const obs = new Obstacle();
             obstacles.push(obs);
 
-            // Gerar Moeda entre os obstáculos (50% de chance)
-            if (Math.random() > 0.5) {
+            // Gerar Moeda entre os obstáculos (80% de chance para coletar mais rápido)
+            if (Math.random() > 0.2) {
                 const coinY = obs.topHeight + (obstacleConfig.gap / 2);
                 coinItems.push(new Coin(canvas.width + 100, coinY));
             }
