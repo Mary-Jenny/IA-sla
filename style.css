@@ -1,0 +1,124 @@
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background: #1a1a2e; /* Temas escuros são mais premium */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* Container de Jogo */
+#game-container {
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 4px solid #4a7c44; /* Borda verde floresta */
+    border-radius: 12px;
+    overflow: hidden;
+    background: #87ceeb; /* Cor do céu inicial */
+}
+
+/* Canvas do Jogo */
+#gameCanvas {
+    display: block;
+    image-rendering: pixelated; /* Dá um look retrô limpo se necessário, ou deixe normal */
+}
+
+/* Camada de UI Principal */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none; /* Deixa cliques passarem para o canvas */
+}
+
+/* Telas (Start, Game Over) */
+.screen {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    backdrop-filter: blur(8px); /* Efeito Glassmorphism premium */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    animation: fadeIn 0.5s ease-out;
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #a8e063, #56ab2f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.instructions {
+    font-size: 0.9rem;
+    color: #ffd700;
+}
+
+.stats {
+    margin: 1.5rem 0;
+    font-size: 1.5rem;
+}
+
+/* Score Board durante o jogo */
+#score-board {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 50px;
+    backdrop-filter: blur(5px);
+}
+
+.score-item {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Animações */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+strong {
+    color: #ffd700;
+    animation: pulse 1.5s infinite ease-in-out;
+    display: inline-block;
+}

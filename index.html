@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Bird - Estilo Flappy Bird</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for a premium look -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="ui-layer">
+            <div id="start-screen" class="screen">
+                <h1>FOREST BIRD</h1>
+                <p>Pressione <strong>ESPAÇO</strong> ou toque para iniciar</p>
+                <div class="instructions">
+                    Desvie das árvores e colete moedas!
+                </div>
+            </div>
+            <div id="game-over-screen" class="screen hidden">
+                <h1>FIM DE JOGO</h1>
+                <div class="stats">
+                    <p>Árvores Superadas: <span id="final-score">0</span></p>
+                    <p>Moedas Coletadas: <span id="final-coins">0</span></p>
+                </div>
+                <p>Pressione <strong>ESPAÇO</strong> para reiniciar</p>
+            </div>
+            <div id="score-board" class="hidden">
+                <div class="score-item">🌳: <span id="current-score">0</span></div>
+                <div class="score-item">🪙: <span id="current-coins">0</span></div>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
