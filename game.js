@@ -1,9 +1,7 @@
 /**
- * Forest Bird - Game Logic
- * Desenvolvido por Antigravity para Jennifer Lacerda.
- * 
- * Siga os comentários para personalizar as cores e os elementos do jogo!
+ * Forest Bird - Game Logic v2.0 (Garantindo Alterações)
  */
+console.log("Game Logic v2.0 Carregada!");
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -35,8 +33,8 @@ const playerConfig = {
     x: 50,
     y: 150,
     radius: 15,
-    gravity: 0.25,  // Reduzido para 0.25 (extrema flutuação)
-    jump: -5,       // Pulo mais suave para combinar com a leveza
+    gravity: 0.15,  // Extrema leveza para flutuar
+    jump: -4,       // Pulo super suave
     color: '#FFD700',
 };
 
@@ -135,40 +133,40 @@ class Obstacle {
     }
 
     drawTree(x, y, w, h, isTop) {
-        // Tronco
-        ctx.fillStyle = '#8B4513';
-        let trunkWidth = w * 0.4;
-        ctx.fillRect(x + (w - trunkWidth) / 2, y, trunkWidth, h);
+        ctx.fillStyle = '#8B4513'; // Marrom
+        let trunkWidth = w * 0.3;
 
-        // Folhas
-        ctx.fillStyle = '#228B22';
         if (isTop) {
-            // Galhos de cima para baixo (Pendurados)
-            this.drawPine(x, y + h, w, -h, true);
+            // ÁRVORE DE CIMA (Pendurada no teto)
+            // Tronco saindo do teto (y=0) até a altura h
+            ctx.fillRect(x + (w - trunkWidth) / 2, 0, trunkWidth, h * 0.5);
+            // Folhas (Triângulos descendo)
+            ctx.fillStyle = '#1e5a1e';
+            this.drawPine(x, h * 0.3, w, h * 0.7, true);
         } else {
-            // Árvore normal (Do chão para cima)
-            this.drawPine(x, y, w, h, false);
+            // ÁRVORE DE BAIXO (Nascendo do chão)
+            // Tronco saindo do chão até a altura h
+            ctx.fillRect(x + (w - trunkWidth) / 2, y + h * 0.5, trunkWidth, h * 0.5);
+            // Folhas (Triângulos subindo)
+            ctx.fillStyle = '#228B22';
+            this.drawPine(x, y, w, h * 0.7, false);
         }
     }
 
     drawPine(x, y, w, h, isTop) {
-        // Camadas de folhas
-        for (let i = 0; i < 3; i++) {
-            let offset = i * (h / 3);
-            ctx.beginPath();
-            if (isTop) {
-                // Triângulos invertidos para galhos superiores
-                ctx.moveTo(x - 10, y - offset);
-                ctx.lineTo(x + w + 10, y - offset);
-                ctx.lineTo(x + w / 2, y - offset + (h / 2));
-            } else {
-                // Triângulos normais para árvores inferiores
-                ctx.moveTo(x - 10, y + h - offset);
-                ctx.lineTo(x + w + 10, y + h - offset);
-                ctx.lineTo(x + w / 2, y + h - offset - (h / 2));
-            }
-            ctx.fill();
+        ctx.beginPath();
+        if (isTop) {
+            // Triângulo apontando para BAIXO
+            ctx.moveTo(x - 15, y);
+            ctx.lineTo(x + w + 15, y);
+            ctx.lineTo(x + w / 2, y + h);
+        } else {
+            // Triângulo apontando para CIMA
+            ctx.moveTo(x - 15, y + h);
+            ctx.lineTo(x + w + 15, y + h);
+            ctx.lineTo(x + w / 2, y);
         }
+        ctx.fill();
     }
 
     update() {
