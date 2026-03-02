@@ -35,9 +35,9 @@ const playerConfig = {
     x: 50,
     y: 150,
     radius: 15,
-    gravity: 0.4,   // Reduzido de 0.6 para 0.4 (mais leve)
-    jump: -6.5,     // Ajustado de -8 para -6.5 para compensar a gravidade menor
-    color: '#FFD700', // Cor do pássaro (Amarelo Ouro)
+    gravity: 0.25,  // Reduzido para 0.25 (extrema flutuação)
+    jump: -5,       // Pulo mais suave para combinar com a leveza
+    color: '#FFD700',
 };
 
 class Player {
@@ -136,34 +136,39 @@ class Obstacle {
 
     drawTree(x, y, w, h, isTop) {
         // Tronco
-        ctx.fillStyle = '#8B4513'; // Saddle Brown
+        ctx.fillStyle = '#8B4513';
         let trunkWidth = w * 0.4;
         ctx.fillRect(x + (w - trunkWidth) / 2, y, trunkWidth, h);
 
-        // Folhas (Triângulos como pinheiros)
-        ctx.fillStyle = '#228B22'; // Forest Green
+        // Folhas
+        ctx.fillStyle = '#228B22';
         if (isTop) {
-            // Desenha triângulos de baixo para cima para a árvore de cima
-            this.drawPine(x, y + h, w, -h);
+            // Galhos de cima para baixo (Pendurados)
+            this.drawPine(x, y + h, w, -h, true);
         } else {
-            // Desenha triângulos de cima para baixo
-            this.drawPine(x, y, w, h);
+            // Árvore normal (Do chão para cima)
+            this.drawPine(x, y, w, h, false);
         }
     }
 
-    drawPine(x, y, w, h) {
-        // Simplificado para 2 camadas de folhas
-        ctx.beginPath();
-        ctx.moveTo(x - 10, y + h * 0.7);
-        ctx.lineTo(x + w + 10, y + h * 0.7);
-        ctx.lineTo(x + w / 2, y + h * 0.2);
-        ctx.fill();
-
-        ctx.beginPath();
-        ctx.moveTo(x - 20, y + h);
-        ctx.lineTo(x + w + 20, y + h);
-        ctx.lineTo(x + w / 2, y + h * 0.5);
-        ctx.fill();
+    drawPine(x, y, w, h, isTop) {
+        // Camadas de folhas
+        for (let i = 0; i < 3; i++) {
+            let offset = i * (h / 3);
+            ctx.beginPath();
+            if (isTop) {
+                // Triângulos invertidos para galhos superiores
+                ctx.moveTo(x - 10, y - offset);
+                ctx.lineTo(x + w + 10, y - offset);
+                ctx.lineTo(x + w / 2, y - offset + (h / 2));
+            } else {
+                // Triângulos normais para árvores inferiores
+                ctx.moveTo(x - 10, y + h - offset);
+                ctx.lineTo(x + w + 10, y + h - offset);
+                ctx.lineTo(x + w / 2, y + h - offset - (h / 2));
+            }
+            ctx.fill();
+        }
     }
 
     update() {
@@ -317,22 +322,52 @@ function gameLoop() {
 function drawBackground() {
     // Céu com gradiente
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#87CEEB'); // Azul claro
-    skyGradient.addColorStop(1, '#E0F6FF'); // Azul quase branco
+    skyGradient.addColorStop(0, '#1a2a6c'); // Azul profundo
+    skyGradient.addColorStop(0.5, '#b21f1f'); // Vermelho pôr do sol
+    skyGradient.addColorStop(1, '#fdbb2d'); // Dourado
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Nuvens Simples (Background Parallax simples pode ser adicionado aqui)
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.beginPath();
-    ctx.arc(100, 100, 30, 0, Math.PI * 2);
-    ctx.arc(130, 110, 20, 0, Math.PI * 2);
-    ctx.arc(70, 110, 20, 0, Math.PI * 2);
-    ctx.fill();
+    // Montanhas Distantes (Paralaxe lento)
+    drawMountains(0.2, '#4b6cb7', 150);
+    // Montanhas Próximas (Paralaxe médio)
+    drawMountains(0.5, '#182848', 100);
+
+    // Nuvens
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    drawCloud(100 + (frames * 0.2) % (canvas.width + 100) - 50, 80);
+    drawCloud(250 + (frames * 0.15) % (canvas.width + 100) - 50, 120);
 
     // Chão
-    ctx.fillStyle = '#3CB371'; // Sea Green
+    ctx.fillStyle = '#2d5a27'; // Verde escuro para combinar com o pôr do sol
     ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
+}
+
+function drawMountains(speed, color, heightOffset) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height);
+
+    // Gerar picos baseados no frame para movimento sutil
+    let move = (frames * speed) % 200;
+    for (let i = -200; i <= canvas.width + 200; i += 100) {
+        let x = i - move;
+        let y = canvas.height - heightOffset - (Math.sin(i * 0.01) * 30);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + 50, y - 40);
+        ctx.lineTo(x + 100, y);
+    }
+
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.fill();
+}
+
+function drawCloud(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, 20, 0, Math.PI * 2);
+    ctx.arc(x + 15, y - 10, 20, 0, Math.PI * 2);
+    ctx.arc(x + 30, y, 20, 0, Math.PI * 2);
+    ctx.fill();
 }
 
 // --- CONTROLES E FLUXO ---
