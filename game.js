@@ -1,7 +1,7 @@
 /**
- * Forest Bird - Game Logic v2.0 (Garantindo Alterações)
+ * Forest Bird - Game Logic v2.1 (Correção de Seleção de Skin)
  */
-console.log("Game Logic v2.0 Carregada!");
+console.log("Game Logic v2.1 Carregada!");
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -456,30 +456,48 @@ document.addEventListener('click', (e) => {
     const shopItem = e.target.closest('.shop-item');
     if (!shopItem) return;
 
+    // Impedir que o clique reinicie o jogo ao clicar na loja
+    e.stopPropagation();
+
     const skinName = shopItem.dataset.skin;
     const price = parseInt(shopItem.dataset.price);
 
     if (ownedSkins.includes(skinName)) {
-        // Selecionar skin já comprada
         selectedSkin = skinName;
         saveGameData();
         updateShopUI();
+
+        // FORÇAR REDESENHO quando o jogo estiver parado no Game Over
+        if (gameState === 'GAME_OVER' || gameState === 'START') {
+            drawFrame();
+        }
     } else {
-        // Tentar comprar
         if (totalCoins >= price) {
             totalCoins -= price;
             ownedSkins.push(skinName);
             selectedSkin = skinName;
             saveGameData();
             updateShopUI();
-            // Atualizar contagem de moedas na tela
             document.getElementById('total-coins').innerText = totalCoins;
-            alert(`Skin ${skinName} comprada com sucesso!`);
+
+            // Forçar redesenho após compra
+            if (gameState === 'GAME_OVER' || gameState === 'START') {
+                drawFrame();
+            }
         } else {
             alert("Moedas insuficientes!");
         }
     }
 });
+
+// Função auxiliar para desenhar apenas um frame parado (util para a loja)
+function drawFrame() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBackground();
+    obstacles.forEach(obs => obs.draw());
+    coinItems.forEach(coin => coin.draw());
+    player.draw();
+}
 
 // Event Listeners
 window.addEventListener('keydown', (e) => {
