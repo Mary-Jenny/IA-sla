@@ -35,8 +35,8 @@ const playerConfig = {
     x: 50,
     y: 150,
     radius: 15,
-    gravity: 0.6,
-    jump: -8,
+    gravity: 0.4,   // Reduzido de 0.6 para 0.4 (mais leve)
+    jump: -6.5,     // Ajustado de -8 para -6.5 para compensar a gravidade menor
     color: '#FFD700', // Cor do pássaro (Amarelo Ouro)
 };
 
