@@ -73,8 +73,8 @@ const playerConfig = {
     x: 50,
     y: 150,
     radius: 15,
-    gravity: 0.15,
-    jump: -4
+    gravity: 0.25,
+    jump: -6
 };
 
 class Player {
