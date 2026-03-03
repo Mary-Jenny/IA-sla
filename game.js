@@ -162,18 +162,26 @@ class Player {
 const obstacles = [];
 const obstacleConfig = {
     width: 60,
-    gap: 160, // Espaço entre a árvore de cima e de baixo
+    gap: 165, // Aumentado levemente o buraco vertical
     minHeight: 50,
-    spawnRate: 100, // Gera uma nova a cada X frames
+    spawnRate: 140, // Aumentado para dar mais espaço horizontal
 };
+
+let lastTopHeight = 200; // Para evitar saltos verticais impossíveis
 
 class Obstacle {
     constructor() {
         this.x = canvas.width;
         this.passed = false;
 
-        // Define a altura da árvore de cima e o buraco
-        this.topHeight = Math.random() * (canvas.height - obstacleConfig.gap - 100) + 50;
+        // Define a altura da árvore evitando variações exageradas
+        // O novo topo pode variar no máximo 150px em relação ao anterior
+        const minH = Math.max(50, lastTopHeight - 150);
+        const maxH = Math.min(canvas.height - obstacleConfig.gap - 50, lastTopHeight + 150);
+
+        this.topHeight = Math.random() * (maxH - minH) + minH;
+        lastTopHeight = this.topHeight; // Salva para a próxima árvore
+
         this.bottomY = this.topHeight + obstacleConfig.gap;
         this.width = obstacleConfig.width;
     }
@@ -476,6 +484,7 @@ function startGame() {
     frames = 0;
     obstacles.length = 0;
     coinItems.length = 0;
+    lastTopHeight = 200; // Reseta a altura base
     player.reset();
 
     // UI Update
