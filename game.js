@@ -36,20 +36,35 @@ if (totalCoins === null) {
 } else {
     totalCoins = parseInt(totalCoins);
 }
+
+let highScore = parseInt(localStorage.getItem('forestBird_highScore')) || 0;
+let deathCount = parseInt(localStorage.getItem('forestBird_deathCount')) || 0;
 let ownedSkins = JSON.parse(localStorage.getItem('forestBird_ownedSkins')) || ['yellow'];
 let selectedSkin = localStorage.getItem('forestBird_selectedSkin') || 'yellow';
 
 const skins = {
-    yellow: { color: '#FFD700', beak: '#FFA500' },
-    red: { color: '#ff4d4d', beak: '#ffd700' },
-    blue: { color: '#4da6ff', beak: '#ffffff' },
-    purple: { color: '#a64dff', beak: '#ff4da6' }
+    yellow: { color1: '#FFD700', color2: '#FFA500', beak: '#FFA500' },
+    red: { color1: '#ff4d4d', color2: '#8b0000', beak: '#ffd700' },
+    blue: { color1: '#4da6ff', color2: '#004080', beak: '#ffffff' },
+    purple: { color1: '#a64dff', color2: '#4b0082', beak: '#ff4da6' },
+    rainbow: { color1: '#ff0000', color2: '#0000ff', beak: '#ffff00', isRainbow: true },
+    emerald: { color1: '#50c878', color2: '#006400', beak: '#ffd700' },
+    sunset: { color1: '#ff7e5f', color2: '#feb47b', beak: '#ffffff' }
 };
+
+const themes = [
+    { skyTop: '#1a2a6c', skyMid: '#b21f1f', skyBottom: '#fdbb2d', mountain1: '#4b6cb7', mountain2: '#182848', ground: '#2d5a27' }, // Sunset
+    { skyTop: '#000000', skyMid: '#0f0c29', skyBottom: '#302b63', mountain1: '#24243e', mountain2: '#000000', ground: '#0a1a0a' }, // Night
+    { skyTop: '#4ca1af', skyMid: '#c4e0e5', skyBottom: '#ffffff', mountain1: '#757f9a', mountain2: '#2c3e50', ground: '#1e3c1e' }, // Day
+    { skyTop: '#e96443', skyMid: '#904e95', skyBottom: '#ffcc33', mountain1: '#654ea3', mountain2: '#eaafc8', ground: '#3e1e1e' }  // Alien
+];
 
 function saveGameData() {
     localStorage.setItem('forestBird_totalCoins', totalCoins);
     localStorage.setItem('forestBird_ownedSkins', JSON.stringify(ownedSkins));
     localStorage.setItem('forestBird_selectedSkin', selectedSkin);
+    localStorage.setItem('forestBird_highScore', highScore);
+    localStorage.setItem('forestBird_deathCount', deathCount);
 }
 
 // --- CONFIGURAÇÕES DO JOGADOR ---
@@ -82,10 +97,25 @@ class Player {
 
         const currentSkinData = skins[selectedSkin];
 
-        // Corpo
-        ctx.fillStyle = currentSkinData.color;
+        // Corpo Principal (Gradiente se for multi-cor)
+        let gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, this.radius);
+        if (currentSkinData.isRainbow) {
+            let hue = (frames * 5) % 360;
+            ctx.fillStyle = `hsl(${hue}, 80%, 60%)`;
+        } else {
+            gradient.addColorStop(0, currentSkinData.color1);
+            gradient.addColorStop(1, currentSkinData.color2 || currentSkinData.color1);
+            ctx.fillStyle = gradient;
+        }
+
         ctx.beginPath();
         ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Asa (mais de uma cor na mesma skin)
+        ctx.fillStyle = currentSkinData.color2 || '#fff';
+        ctx.beginPath();
+        ctx.ellipse(-5, 0, 8, 5, Math.PI / 4, 0, Math.PI * 2);
         ctx.fill();
 
         // Olho
@@ -98,7 +128,7 @@ class Player {
         ctx.fillStyle = currentSkinData.beak;
         ctx.beginPath();
         ctx.moveTo(this.radius - 2, 0);
-        ctx.lineTo(this.radius + 8, 2);
+        ctx.lineTo(this.radius + 10, 2);
         ctx.lineTo(this.radius - 2, 8);
         ctx.fill();
 
@@ -197,19 +227,23 @@ class Obstacle {
     }
 
     checkCollision(player) {
-        // Margem de erro (buffer) para colisão ser mais amigável
-        const buffer = 5;
+        // Reduzi a largura da colisão para evitar "paredes invisíveis"
+        // O visual do bico e das pontas das árvores não deve matar o jogador injustamente
+        const collisionWidth = this.width * 0.7; // Colisão mais estreita que o desenho
+        const xOffset = (this.width - collisionWidth) / 2;
+        const buffer = 8; // Buffer maior para ser mais amigável
 
         // Colisão com árvore de cima
-        if (player.x + player.radius - buffer > this.x &&
-            player.x - player.radius + buffer < this.x + this.width &&
+        if (player.x + player.radius - buffer > this.x + xOffset &&
+            player.x - player.radius + buffer < this.x + xOffset + collisionWidth &&
             player.y - player.radius + buffer < this.topHeight) {
             return true;
         }
 
         // Colisão com árvore de baixo
-        if (player.x + player.radius - buffer > this.x &&
-            player.x - player.radius + buffer < this.x + this.width &&
+        // Na de baixo, as folhas são mais largas, mas o bico do pássaro pode "entrar" um pouco nelas
+        if (player.x + player.radius - buffer > this.x + xOffset &&
+            player.x - player.radius + buffer < this.x + xOffset + collisionWidth &&
             player.y + player.radius - buffer > this.bottomY) {
             return true;
         }
@@ -341,18 +375,21 @@ function gameLoop() {
 }
 
 function drawBackground() {
-    // Céu com gradiente
+    const themeIdx = deathCount % themes.length;
+    const theme = themes[themeIdx];
+
+    // Céu com gradiente dinâmico
     let skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    skyGradient.addColorStop(0, '#1a2a6c'); // Azul profundo
-    skyGradient.addColorStop(0.5, '#b21f1f'); // Vermelho pôr do sol
-    skyGradient.addColorStop(1, '#fdbb2d'); // Dourado
+    skyGradient.addColorStop(0, theme.skyTop);
+    skyGradient.addColorStop(0.5, theme.skyMid);
+    skyGradient.addColorStop(1, theme.skyBottom);
     ctx.fillStyle = skyGradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Montanhas Distantes (Paralaxe lento)
-    drawMountains(0.2, '#4b6cb7', 150);
+    drawMountains(0.2, theme.mountain1, 150);
     // Montanhas Próximas (Paralaxe médio)
-    drawMountains(0.5, '#182848', 100);
+    drawMountains(0.5, theme.mountain2, 100);
 
     // Nuvens
     ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
@@ -360,7 +397,7 @@ function drawBackground() {
     drawCloud(250 + (frames * 0.15) % (canvas.width + 100) - 50, 120);
 
     // Chão
-    ctx.fillStyle = '#2d5a27'; // Verde escuro para combinar com o pôr do sol
+    ctx.fillStyle = theme.ground;
     ctx.fillRect(0, canvas.height - 10, canvas.width, 10);
 }
 
@@ -417,6 +454,14 @@ function gameOver() {
     gameState = 'GAME_OVER';
     cancelAnimationFrame(animationId);
 
+    // Atualiza recorde
+    if (score > highScore) {
+        highScore = score;
+    }
+
+    // Incrementa contador de mortes para mudar cenario
+    deathCount++;
+
     // Atualiza moedas totais
     totalCoins += coins;
     saveGameData();
@@ -425,6 +470,7 @@ function gameOver() {
     finalScoreEl.innerText = score;
     finalCoinsEl.innerText = coins;
     document.getElementById('total-coins').innerText = totalCoins;
+    document.getElementById('high-score').innerText = highScore; // Novo campo
     updateShopUI();
     gameOverScreen.classList.remove('hidden');
 }
@@ -446,7 +492,10 @@ function updateShopUI() {
         if (ownedSkins.includes(skinName)) {
             item.classList.add('owned');
             const span = item.querySelector('span');
-            span.innerText = (selectedSkin === skinName) ? "USANDO" : "PROPRIETÁRIO";
+            span.innerText = (selectedSkin === skinName) ? "EM USO" : "TER";
+        } else {
+            const span = item.querySelector('span');
+            span.innerText = `🪙 ${price}`;
         }
     });
 }
