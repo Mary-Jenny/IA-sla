@@ -25,8 +25,9 @@ let animationId;
 let frames = 0;
 let score = 0;
 let coins = 0;
-let gameSpeed = 3;
-let difficultyFactor = 0.001;
+let gameSpeed = 3.5;
+let difficultyFactor = 0.002; // Aumentado para ser mais perceptível
+let maxSpeed = 10;
 
 // --- SISTEMA DE LOGA E PERSISTÊNCIA ---
 let totalCoins = localStorage.getItem('forestBird_totalCoins');
@@ -227,25 +228,58 @@ class Obstacle {
     }
 
     checkCollision(player) {
-        // Reduzi a largura da colisão para evitar "paredes invisíveis"
-        // O visual do bico e das pontas das árvores não deve matar o jogador injustamente
-        const collisionWidth = this.width * 0.7; // Colisão mais estreita que o desenho
-        const xOffset = (this.width - collisionWidth) / 2;
-        const buffer = 8; // Buffer maior para ser mais amigável
+        // Margem de "perdão" para o jogador
+        const pR = player.radius * 0.7; // Usa um raio menor para colisão ser mais justa
+        const pX = player.x;
+        const pY = player.y;
 
-        // Colisão com árvore de cima
-        if (player.x + player.radius - buffer > this.x + xOffset &&
-            player.x - player.radius + buffer < this.x + xOffset + collisionWidth &&
-            player.y - player.radius + buffer < this.topHeight) {
+        // Trunk collision (Tronco) - Muito mais fino que a árvore
+        const trunkWidth = this.width * 0.25;
+        const trunkX = this.x + (this.width - trunkWidth) / 2;
+
+        // Arvore de Cima (Top Tree)
+        const topH = this.topHeight;
+        const topTrunkH = topH * 0.5;
+        const topPineStart = topH * 0.3;
+
+        // 1. Colisão com Tronco de Cima
+        if (pX + pR > trunkX && pX - pR < trunkX + trunkWidth && pY - pR < topTrunkH) {
             return true;
         }
 
-        // Colisão com árvore de baixo
-        // Na de baixo, as folhas são mais largas, mas o bico do pássaro pode "entrar" um pouco nelas
-        if (player.x + player.radius - buffer > this.x + xOffset &&
-            player.x - player.radius + buffer < this.x + xOffset + collisionWidth &&
-            player.y + player.radius - buffer > this.bottomY) {
+        // 2. Colisão com Pine de Cima (Triângulo)
+        // Base em topPineStart (y), largura base = width + 30
+        // Ponta em topH (y), largura = 0
+        if (pY + pR > topPineStart && pY - pR < topH) {
+            const relativeY = (pY - topPineStart) / (topH - topPineStart);
+            const halfWidthAtY = (1 - relativeY) * (this.width / 2 + 15);
+            const centerX = this.x + this.width / 2;
+            if (pX + pR > centerX - halfWidthAtY && pX - pR < centerX + halfWidthAtY) {
+                return true;
+            }
+        }
+
+        // Arvore de Baixo (Bottom Tree)
+        const botY = this.bottomY;
+        const botH = canvas.height - botY;
+        const botTrunkStart = botY + botH * 0.5;
+        const botPineEnd = botY + botH * 0.7;
+
+        // 3. Colisão com Tronco de Baixo
+        if (pX + pR > trunkX && pX - pR < trunkX + trunkWidth && pY + pR > botTrunkStart) {
             return true;
+        }
+
+        // 4. Colisão com Pine de Baixo (Triângulo)
+        // Ponta em botY (y), largura = 0
+        // Base em botPineEnd (y), largura base = width + 30
+        if (pY + pR > botY && pY - pR < botPineEnd) {
+            const relativeY = (pY - botY) / (botPineEnd - botY);
+            const halfWidthAtY = relativeY * (this.width / 2 + 15);
+            const centerX = this.x + this.width / 2;
+            if (pX + pR > centerX - halfWidthAtY && pX - pR < centerX + halfWidthAtY) {
+                return true;
+            }
         }
 
         return false;
@@ -310,8 +344,10 @@ function gameLoop() {
     if (gameState === 'PLAYING') {
         frames++;
 
-        // Aumenta dificuldade
-        gameSpeed += difficultyFactor;
+        // Aumenta dificuldade de forma gradual mas perceptível
+        if (gameSpeed < maxSpeed) {
+            gameSpeed += difficultyFactor;
+        }
 
         // Gerar Obstáculos
         if (frames % Math.floor(obstacleConfig.spawnRate * (3 / gameSpeed)) === 0) {
@@ -436,7 +472,7 @@ function startGame() {
     gameState = 'PLAYING';
     score = 0;
     coins = 0;
-    gameSpeed = 3;
+    gameSpeed = 3.5;
     frames = 0;
     obstacles.length = 0;
     coinItems.length = 0;
